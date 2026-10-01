@@ -15,7 +15,7 @@ One call answers one question - **can I send to this address without bouncing?**
 npm install mailrambo
 ```
 
-Get a free API key (50 verifications/month, API on every plan) at [mailrambo.com](https://www.mailrambo.com/auth/signup?src=npm).
+Get a free API key (100 verifications/month, API on every plan) at [mailrambo.com](https://www.mailrambo.com/auth/signup?src=npm).
 
 ## Quick start
 
@@ -44,6 +44,22 @@ export async function isAllowedSignup(email) {
   }
 }
 ```
+
+## Fast mode for signup forms (free)
+
+```js
+const r = await mr.verify("jane@gmial.com", { mode: "fast" }); // < 1s, no credit
+r.deliverable; // false = reject (invalid_syntax, possible_typo, disposable, no_mx); null = looks fine, mailbox not checked
+r.suggestion;  // "jane@gmail.com"
+```
+
+Repeat checks of the same address within 24 hours are also free (`cached: true`).
+
+## Better Auth integration
+
+For Better Auth email/password signup, use the separately published [`better-auth-mailrambo`](https://www.npmjs.com/package/better-auth-mailrambo) plugin and [complete setup guide](https://www.mailrambo.com/blog/block-disposable-emails-better-auth). Version 0.1.0 requires Better Auth 1.7.7 and Node >=22; check compatibility before upgrading an existing auth framework.
+
+The plugin uses free fast mode with a 2,000 ms remote timeout and zero automatic retries, rather than this SDK's ordinary defaults. Runtime screening errors allow signup to continue; email confirmation is unchanged. It does not cover OAuth, OTP, magic links or email changes. A passed fast check does not confirm mailbox existence.
 
 ## Full detail
 
@@ -100,6 +116,8 @@ try {
 ## Test mode
 
 Create a `mr_test_...` key on the [API Keys page](https://www.mailrambo.com/api-keys). No credits are used, and the answer depends on the part before the `@`:
+
+Those canned answers apply to full mailbox checks. Both live and test keys run real fast checks when `{ mode: "fast" }` is requested.
 
 ```js
 await mr.verify("deliverable@example.com"); // true,  "mailbox_exists"
