@@ -64,7 +64,7 @@ export class MailRambo {
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
         Accept: "application/json",
-        "User-Agent": "mailrambo-node/0.1.0",
+        "User-Agent": "mailrambo-node/0.2.1",
         ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
         ...headers,
       },
@@ -100,12 +100,17 @@ export class MailRambo {
   /**
    * Verify one address. 1 credit (invalid syntax is free).
    * @param {string} email
-   * @param {{ detail?: boolean }} [options] detail: include grade, flags and DNS auth data
+   * @param {{ detail?: boolean, mode?: "fast" | "full" }} [options]
+   *   detail: include grade, flags and DNS auth data
+   *   mode: "fast" = free sub-second check for forms (deliverable is false or null)
    */
   verify(email, options = {}) {
+    const query = {};
+    if (options.detail) query.detail = "full";
+    if (options.mode) query.mode = options.mode;
     return this._request("POST", "/verify", {
       body: { email },
-      query: options.detail ? { detail: "full" } : undefined,
+      query: Object.keys(query).length ? query : undefined,
     });
   }
 

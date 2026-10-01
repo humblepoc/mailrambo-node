@@ -98,3 +98,9 @@ test("waitForBatch polls until completed", async () => {
   assert.equal(b.status, "completed");
   assert.equal(fetch.calls.length, 2);
 });
+
+test("mode option adds ?mode=fast", async () => {
+  const { mr, fetch } = client([{ body: { deliverable: null, reason: "fast_check_passed" } }]);
+  await mr.verify("a@b.co", { mode: "fast", detail: true });
+  assert.equal(fetch.calls[0].url, "https://www.mailrambo.com/v1/verify?detail=full&mode=fast");
+});

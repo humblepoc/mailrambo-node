@@ -1,6 +1,6 @@
 {
   "name": "mailrambo",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Official Node.js client for the MailRambo email verification API - strict yes/no deliverability, disposable and catch-all detection.",
   "type": "module",
   "main": "./index.js",

@@ -8,7 +8,10 @@ export type Reason =
   | "mailbox_disabled"
   | "catch_all"
   | "mailbox_not_found"
-  | "unverifiable";
+  | "unverifiable"
+  | "no_mx"
+  | "possible_typo"
+  | "fast_check_passed";
 
 export interface VerifyDetail {
   grade: "A" | "B" | "C" | "D" | "F" | null;
@@ -34,13 +37,19 @@ export interface VerifyDetail {
 
 export interface VerifyResult {
   email: string;
-  /** true ONLY when the mailbox is confirmed; catch-all and unknown are false. */
-  deliverable: boolean;
+  /** true ONLY when the mailbox is confirmed; catch-all and unknown are false. null in fast mode when no problem was found. */
+  deliverable: boolean | null;
   reason: Reason;
   /** null for free answers (invalid syntax, test keys). */
   credits_remaining: number | null;
   /** present when called with { detail: true } */
   detail?: VerifyDetail;
+  /** true when answered free from your own check of the same address in the last 24h */
+  cached?: boolean;
+  /** fast mode only */
+  mode?: "fast";
+  suggestion?: string | null;
+  checks?: { mx: boolean; disposable: boolean; role_account: boolean; free_email: boolean } | null;
 }
 
 export interface BatchCreated {
@@ -96,7 +105,7 @@ export declare class MailRamboError extends Error {
 export declare class MailRambo {
   constructor(options?: MailRamboOptions);
   readonly isTestMode: boolean;
-  verify(email: string, options?: { detail?: boolean }): Promise<VerifyResult>;
+  verify(email: string, options?: { detail?: boolean; mode?: "fast" | "full" }): Promise<VerifyResult>;
   createBatch(emails: string[], options?: { name?: string; idempotencyKey?: string }): Promise<BatchCreated>;
   getBatch(batchId: string): Promise<Batch>;
   waitForBatch(batchId: string, options?: { interval?: number; timeout?: number }): Promise<Batch & { results: BatchRow[] }>;
